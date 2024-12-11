@@ -14,8 +14,30 @@
             <input type="password" id="register-password" name="password" placeholder="Пароль" required>
             <button type="submit">Зарегистрироваться</button>
         </form>
+        <script>
+            document.getElementById('register-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const username = document.getElementById('register-username').value;
+                const password = document.getElementById('register-password').value;
+
+                try {
+                    const response = await fetch('http://localhost:3001/users', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    alert('Регистрация успешна!');
+                    window.location.href = 'login.html';
+                } catch (error) {
+                    console.error('Registration error:', error);
+                    alert('Ошибка регистрации: ' + error.message);
+                }
+            });
+        </script>
     </div>
-    <script src="register.js"></script>
 </body>
 
 </html>

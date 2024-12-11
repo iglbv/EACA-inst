@@ -7,27 +7,63 @@
 </head>
 
 <body>
-    <script>
-        if (!localStorage.getItem('user') && window.location.pathname !== '/login' && window.location.pathname !== '/register') {
-            window.location.href = '/login';
-        }
-    </script>
-    <header>
-        <h1>DA RAM <span id="username-display"></span></h1>
+    <header class="site-header">
+        <h1>DA RAM</h1>
         <nav>
             <a href="/">Главная</a>
-            <a href="/profile" id="profile-link" style="display: none;">Профиль</a>
-            <a href="/search" id="search-link" style="display: none;">Поиск</a>
-            <a href="#" id="logout-link" style="display: none;">Выйти</a>
-            <a href="/login" id="login-link">Вход</a>
-            <a href="/register" id="register-link">Регистрация</a>
+            <a href="profile.html">Профиль</a>
+            <a href="search.html">Поиск</a>
         </nav>
     </header>
+
     <main>
         <h2>Главная лента</h2>
         <div id="posts"></div>
+        <script>
+            async function loadPosts() {
+                try {
+                    const responsePosts = await fetch('http://localhost:3001/posts');
+                    if (!responsePosts.ok) {
+                        throw new Error(`HTTP error fetching posts: ${responsePosts.status}`);
+                    }
+                    const posts = await responsePosts.json();
+                    const responseUsers = await fetch('http://localhost:3001/users');
+                    if (!responseUsers.ok) {
+                        throw new Error(`HTTP error fetching users: ${responseUsers.status}`);
+                    }
+                    const users = await responseUsers.json();
+                    const postsContainer = document.getElementById('posts');
+                    postsContainer.innerHTML = '';
+
+                    if (posts.length === 0) {
+                        postsContainer.innerHTML = "<p>Нет постов.</p>";
+                        return;
+                    }
+
+                    posts.forEach(post => {
+                        const user = users.find(user => user.id === post.userId);
+                        const postDiv = document.createElement('div');
+                        postDiv.classList.add('post');
+                        postDiv.innerHTML = `
+                            <div class="post-header">
+                                <img src="${user?.avatarURL || 'default-avatar.svg'}" alt="Аватар пользователя">
+                                <h3>${user ? user.username : 'Unknown User'}</h3>
+                            </div>
+                            ${post.photoURL ? `<img src="${post.photoURL}" alt="Фотография к посту">` : ''}
+                            <p>${post.text}</p>
+                            <p>Дата: ${new Date(post.date).toLocaleDateString()}</p>
+                        `;
+                        postsContainer.appendChild(postDiv);
+                    });
+                } catch (error) {
+                    console.error('Error loading posts:', error);
+                    const postsContainer = document.getElementById('posts');
+                    postsContainer.innerHTML = `<p>Ошибка загрузки постов: ${error.message}</p>`;
+                }
+            }
+            loadPosts();
+        </script>
     </main>
-    <script src="script.js"></script>
 </body>
 
 </html>

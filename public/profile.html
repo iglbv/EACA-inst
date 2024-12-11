@@ -7,37 +7,124 @@
 </head>
 
 <body>
-    <script>
-        if (!localStorage.getItem('user')) {
-            window.location.href = '/login';
-        }
-    </script>
     <header>
         <h1>DA RAM</h1>
         <nav>
             <a href="/">Главная</a>
-            <a href="/profile">Профиль</a>
-            <a href="/search">Поиск</a>
+            <a href="profile.html">Профиль</a>
+            <a href="search.html">Поиск</a>
+            <a href="#" id="logout-link">Выйти</a>
         </nav>
     </header>
     <main>
         <h2>Мой профиль</h2>
         <div id="profile-info">
-            <img id="avatar" src="avatar.jpg" alt="Аватар"> 
-            <p>Имя: <span id="name">Имя пользователя</span></p>
+            <img id="avatar" src="default-avatar.svg" alt="Аватар">
+            <p>Имя: <span id="name"></span></p>
             <p>Описание: <span id="description">Описание профиля</span></p>
+            <input type="file" id="avatar-upload" accept="image/*">
+            <button id="upload-avatar">Загрузить аватар</button>
         </div>
 
         <h3>Добавить публикацию</h3>
+        <input type="file" id="post-photo-upload" accept="image/*">
         <textarea id="post-text" placeholder="Текст публикации"></textarea>
         <button id="add-post">Добавить</button>
 
+        <script>
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user) {
+                document.getElementById('name').textContent = user.username;
+                document.getElementById('avatar').src = user.avatarURL || 'default-avatar.svg';
+            } else {
+                window.location.href = 'login.html';
+            }
+
+            document.getElementById('add-post').addEventListener('click', async () => {
+                const fileInput = document.getElementById('post-photo-upload');
+                const file = fileInput.files[0];
+                const postText = document.getElementById('post-text').value;
+                const userId = user.id;
+                const currentDate = new Date().toISOString();
+
+                if (postText.trim() === '') return;
+
+                let photoURL = '';
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        photoURL = e.target.result;
+                        await sendPost(photoURL, postText, userId, currentDate);
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    await sendPost('', postText, userId, currentDate);
+                }
+
+                async function sendPost(photoURL, postText, userId, currentDate) {
+                    try {
+                        const response = await fetch('http://localhost:3001/posts', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                text: postText,
+                                userId: userId,
+                                photoURL: photoURL,
+                                date: currentDate
+                            })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        document.getElementById('post-text').value = '';
+                        document.getElementById('post-photo-upload').value = '';
+                        alert('Пост добавлен!');
+                    } catch (error) {
+                        console.error('Error adding post:', error);
+                        alert('Ошибка добавления поста: ' + error.message);
+                    }
+                }
+            });
+
+            document.getElementById('upload-avatar').addEventListener('click', async () => {
+                const fileInput = document.getElementById('avatar-upload');
+                const file = fileInput.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const avatarURL = e.target.result;
+                    try {
+                        const response = await fetch(`http://localhost:3001/users/${user.id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ avatarURL: avatarURL })
+                        });
+                        if (!response.ok) {
+                            throw new Error(`HTTP error updating avatar: ${response.status}`);
+                        }
+                        document.getElementById('avatar').src = avatarURL;
+                        document.getElementById('avatar-upload').value = '';
+                        alert('Аватар обновлен!');
+                        localStorage.setItem('user', JSON.stringify({ ...user, avatarURL }));
+                    } catch (error) {
+                        console.error('Error updating avatar:', error);
+                        alert('Ошибка обновления аватара: ' + error.message);
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+
+            document.getElementById('logout-link').addEventListener('click', () => {
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            });
+        </script>
+
         <h3>Мои публикации</h3>
-        <div id="user-posts">
-            <!-- Публикации будут загружены здесь -->
-        </div>
+        <div id="user-posts"></div>
     </main>
-    <script src="script.js"></script>
 </body>
 
 </html>

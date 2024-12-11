@@ -1,4 +1,10 @@
 {
-  "users": [],
+  "users": [
+    {
+      "id": "0131",
+      "username": "Ilya",
+      "password": "1"
+    }
+  ],
   "posts": []
 }
