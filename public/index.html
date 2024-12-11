@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>DA RAM</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <script>
+        if (!localStorage.getItem('user') && window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+            window.location.href = '/login';
+        }
+    </script>
+    <header>
+        <h1>DA RAM <span id="username-display"></span></h1>
+        <nav>
+            <a href="/">Главная</a>
+            <a href="/profile" id="profile-link" style="display: none;">Профиль</a>
+            <a href="/search" id="search-link" style="display: none;">Поиск</a>
+            <a href="#" id="logout-link" style="display: none;">Выйти</a>
+            <a href="/login" id="login-link">Вход</a>
+            <a href="/register" id="register-link">Регистрация</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Главная лента</h2>
+        <div id="posts"></div>
+    </main>
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>DA RAM - Профиль</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <script>
+        if (!localStorage.getItem('user')) {
+            window.location.href = '/login';
+        }
+    </script>
+    <header>
+        <h1>DA RAM</h1>
+        <nav>
+            <a href="/">Главная</a>
+            <a href="/profile">Профиль</a>
+            <a href="/search">Поиск</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Мой профиль</h2>
+        <div id="profile-info">
+            <img id="avatar" src="avatar.jpg" alt="Аватар"> 
+            <p>Имя: <span id="name">Имя пользователя</span></p>
+            <p>Описание: <span id="description">Описание профиля</span></p>
+        </div>
+
+        <h3>Добавить публикацию</h3>
+        <textarea id="post-text" placeholder="Текст публикации"></textarea>
+        <button id="add-post">Добавить</button>
+
+        <h3>Мои публикации</h3>
+        <div id="user-posts">
+            <!-- Публикации будут загружены здесь -->
+        </div>
+    </main>
+    <script src="script.js"></script>
+</body>
+
+</html>

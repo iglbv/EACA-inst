@@ -1,0 +1,109 @@
+/* styles.css */
+
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    /* Светло-серый фон */
+}
+
+header {
+    background-color: #333;
+    /* Темно-серый заголовок */
+    color: white;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+}
+
+header nav {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+header nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    /* Плавный переход цвета при наведении */
+}
+
+header nav a:hover {
+    background-color: #555;
+    /* Темнее при наведении */
+}
+
+main {
+    padding: 2rem;
+}
+
+h2 {
+    margin-bottom: 1rem;
+}
+
+/* Стили для форм авторизации и регистрации */
+#login-form-container,
+#register-form-container {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    /* Тень для формы */
+    margin-bottom: 1rem;
+}
+
+#login-form-container h2,
+#register-form-container h2 {
+    margin-top: 0;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form input,
+form button {
+    margin-bottom: 1rem;
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+form button {
+    background-color: #4CAF50;
+    /* Зеленый цвет кнопки */
+    color: white;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #45a049;
+    /* Темнее при наведении */
+}
+
+/* Стили для главной страницы */
+#posts {
+    /* Стили для отображения постов */
+}
+
+/* Responsive styles (optional) */
+@media (max-width: 768px) {
+    header nav {
+        flex-direction: column;
+        /* Вертикальное расположение навигации на маленьких экранах */
+    }
+
+    header nav a {
+        margin: 0.5rem 0;
+        /* Отступы сверху и снизу */
+    }
+}
