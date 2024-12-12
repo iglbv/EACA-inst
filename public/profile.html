@@ -20,10 +20,10 @@
         <h2>Мой профиль</h2>
         <div id="profile-info">
             <img id="avatar" src="default-avatar.svg" alt="Аватар">
-            <p>Имя: <span id="name"></span></p>
-            <p>Описание: <span id="description">Описание профиля</span></p>
-            <input type="file" id="avatar-upload" accept="image/*">
-            <button id="upload-avatar">Загрузить аватар</button>
+            <div class="profile-details">
+                <p><strong>Имя:</strong> <span id="name"></span></p>
+                <p><strong>Описание:</strong> <span id="description">Описание профиля</span></p>
+            </div>
         </div>
 
         <h3>Добавить публикацию</h3>
@@ -31,13 +31,15 @@
         <textarea id="post-text" placeholder="Текст публикации"></textarea>
         <button id="add-post">Добавить</button>
 
+        <h3>Мои публикации</h3>
+        <div id="user-posts"></div>
+
         <script>
             const user = JSON.parse(localStorage.getItem('user'));
-            if (user) {
-                document.getElementById('name').textContent = user.username;
-                document.getElementById('avatar').src = user.avatarURL || 'default-avatar.svg';
-            } else {
+            if (!user) {
                 window.location.href = 'login.html';
+            } else {
+                document.getElementById('name').textContent = user.username;
             }
 
             document.getElementById('add-post').addEventListener('click', async () => {
@@ -77,9 +79,9 @@
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
+                        loadUserPosts();
                         document.getElementById('post-text').value = '';
                         document.getElementById('post-photo-upload').value = '';
-                        alert('Пост добавлен!');
                     } catch (error) {
                         console.error('Error adding post:', error);
                         alert('Ошибка добавления поста: ' + error.message);
@@ -87,43 +89,62 @@
                 }
             });
 
-            document.getElementById('upload-avatar').addEventListener('click', async () => {
-                const fileInput = document.getElementById('avatar-upload');
-                const file = fileInput.files[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    const avatarURL = e.target.result;
-                    try {
-                        const response = await fetch(`http://localhost:3001/users/${user.id}`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ avatarURL: avatarURL })
-                        });
-                        if (!response.ok) {
-                            throw new Error(`HTTP error updating avatar: ${response.status}`);
-                        }
-                        document.getElementById('avatar').src = avatarURL;
-                        document.getElementById('avatar-upload').value = '';
-                        alert('Аватар обновлен!');
-                        localStorage.setItem('user', JSON.stringify({ ...user, avatarURL }));
-                    } catch (error) {
-                        console.error('Error updating avatar:', error);
-                        alert('Ошибка обновления аватара: ' + error.message);
-                    }
-                };
-                reader.readAsDataURL(file);
-            });
-
             document.getElementById('logout-link').addEventListener('click', () => {
                 localStorage.removeItem('user');
                 window.location.href = 'login.html';
             });
-        </script>
 
-        <h3>Мои публикации</h3>
-        <div id="user-posts"></div>
+            async function loadUserPosts() {
+                try {
+                    const response = await fetch(`http://localhost:3001/posts?userId=${user.id}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const posts = await response.json();
+                    const postsContainer = document.getElementById('user-posts');
+                    postsContainer.innerHTML = '';
+
+                    if (posts.length === 0) {
+                        postsContainer.innerHTML = "<p>Нет постов.</p>";
+                        return;
+                    }
+
+                    posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                    let postRow = document.createElement('div');
+                    postRow.classList.add('post-row');
+                    let postCount = 0;
+
+                    posts.forEach(post => {
+                        const postDiv = document.createElement('div');
+                        postDiv.classList.add('post');
+                        postDiv.innerHTML = `
+                            ${post.photoURL ? `<img src="${post.photoURL}" alt="Фотография к посту">` : ''}
+                            <p>${post.text}</p>
+                            <p>Опубликовано: ${new Date(post.date).toLocaleDateString()}</p>
+                        `;
+                        postRow.appendChild(postDiv);
+                        postCount++;
+
+                        if (postCount === 3) {
+                            postsContainer.appendChild(postRow);
+                            postRow = document.createElement('div');
+                            postRow.classList.add('post-row');
+                            postCount = 0;
+                        }
+                    });
+
+                    if (postCount > 0) {
+                        postsContainer.appendChild(postRow);
+                    }
+                } catch (error) {
+                    console.error('Error loading user posts:', error);
+                    const postsContainer = document.getElementById('user-posts');
+                    postsContainer.innerHTML = `<p>Ошибка загрузки постов: ${error.message}</p>`;
+                }
+            }
+            loadUserPosts();
+        </script>
     </main>
 </body>
 

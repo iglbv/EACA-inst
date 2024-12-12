@@ -21,16 +21,16 @@ header {
 header h1 {
     margin: 0;
     font-size: 2em;
-
 }
 
-header nav {
+nav {
+
     display: flex;
     justify-content: center;
     margin-top: 1rem;
 }
 
-header nav a {
+nav a {
     color: white;
     text-decoration: none;
     margin: 0 1rem;
@@ -39,7 +39,7 @@ header nav a {
     transition: background-color 0.3s ease;
 }
 
-header nav a:hover {
+nav a:hover {
     background-color: #555;
 }
 
@@ -47,12 +47,151 @@ main {
     padding: 2rem;
     max-width: 800px;
     margin: 0 auto;
+}
 
+
+h2,
+h3 {
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+p {
+    margin-bottom: 0.5rem;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+
+form {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    margin: 50px auto;
+}
+
+label {
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+input,
+textarea,
+button {
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    box-sizing: border-box;
+}
+
+input[type="file"],
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#posts .post {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#posts .post p {
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+#posts .post .post-header {
+    display: flex;
+    align-items: center;
+    margin-right: auto;
+    margin-bottom: 0.5rem;
+}
+
+#posts .post .post-header img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+
+#posts .post img {
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+#user-posts .post-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+#user-posts .post {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    padding: 1rem;
+    margin: 10px;
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#user-posts .post img {
+    max-width: 100%;
+    height: auto;
+    margin: 1rem auto;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+#user-posts .post-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    width: 100%;
+}
+
+#user-posts .post-header img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
 }
 
 #profile-info {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     margin-bottom: 2rem;
 }
 
@@ -63,69 +202,19 @@ main {
     margin-right: 2rem;
 }
 
-#profile-info p {
-    margin: 0;
+.profile-details {
+    flex: 1;
 }
 
-h2,
-h3 {
-    color: #333;
-    margin-bottom: 1rem;
-}
-
-textarea,
-input[type="file"],
-input[type="text"] {
-    width: 100%;
-    padding: 0.8rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    margin-bottom: 1rem;
-    box-sizing: border-box;
-
-}
-
-button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 0.8rem 1.5rem;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-button:hover {
-    background-color: #45a049;
-}
-
-#user-posts {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.post {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    padding: 1rem;
-    margin: 1rem;
-    width: 300px;
-    text-align: center;
-}
-
-.post img {
-    max-width: 100%;
-    height: auto;
+.profile-details p {
     margin-bottom: 0.5rem;
+
 }
 
-.post h3 {
-    margin-top: 0;
-    margin-bottom: 0.5rem;
+.profile-details strong {
+    display: block;
+    margin-bottom: 0.2rem;
 }
-
 
 #login-form-container,
 #register-form-container {
@@ -133,72 +222,35 @@ button:hover {
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    margin-bottom: 1rem;
-    width: 300px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
     margin: 50px auto;
-}
-
-#profile-info img {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    margin-right: 1rem;
+    text-align: center;
 
 }
 
-.post-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.5rem;
-}
-
-.post-header img {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    margin-right: 0.5rem;
-}
-
-#login-form-container h2,
-#register-form-container h2 {
-    margin-top: 0;
-}
-
-form {
-    display: flex;
-    flex-direction: column;
-}
-
-form input,
-form button {
-    margin-bottom: 1rem;
-    padding: 0.8rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-form button {
-    background-color: #4CAF50;
-    color: white;
-    cursor: pointer;
-}
-
-form button:hover {
-    background-color: #45a049;
-}
 
 @media (max-width: 768px) {
-    header nav {
+    nav {
         flex-direction: column;
+    }
+
+    .post {
+        width: 48%;
 
     }
 
-    header nav a {
+    nav a {
         margin: 0.5rem 0;
+    }
 
+    form {
+        width: auto;
+        margin: 20px;
+
+    }
+}
+
+@media (max-width: 480px) {
+    .post {
+        width: 100%;
     }
 }

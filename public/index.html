@@ -13,6 +13,7 @@
             <a href="/">Главная</a>
             <a href="profile.html">Профиль</a>
             <a href="search.html">Поиск</a>
+            <a href="#" id="logout-link">Выйти</a>
         </nav>
     </header>
 
@@ -40,6 +41,8 @@
                         return;
                     }
 
+                    posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
                     posts.forEach(post => {
                         const user = users.find(user => user.id === post.userId);
                         const postDiv = document.createElement('div');
@@ -51,7 +54,7 @@
                             </div>
                             ${post.photoURL ? `<img src="${post.photoURL}" alt="Фотография к посту">` : ''}
                             <p>${post.text}</p>
-                            <p>Дата: ${new Date(post.date).toLocaleDateString()}</p>
+                            <p>Опубликовано: ${new Date(post.date).toLocaleDateString()}</p>
                         `;
                         postsContainer.appendChild(postDiv);
                     });
@@ -62,6 +65,11 @@
                 }
             }
             loadPosts();
+
+            document.getElementById('logout-link').addEventListener('click', () => {
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            });
         </script>
     </main>
 </body>
