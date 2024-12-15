@@ -19,10 +19,18 @@
     <main>
         <h2>Мой профиль</h2>
         <div id="profile-info">
-            <img id="avatar" src="default-avatar.svg" alt="Аватар">
-            <div class="profile-details">
-                <p><strong>Имя:</strong> <span id="name"></span></p>
-                <p><strong>Описание:</strong> <span id="description">Описание профиля</span></p>
+            <div class="avatar-container">
+                <img id="avatar" src="default-avatar.svg" alt="Аватар">
+                <input type="file" id="avatar-upload" accept="image/*">
+                <button id="update-avatar">Обновить аватар</button>
+            </div>
+            <div class="profile-details-container">
+                <div class="profile-details">
+                    <p><strong>Имя:</strong> <span id="name"></span></p>
+                    <p><strong>Описание:</strong> <span id="description">Описание профиля</span></p>
+                </div>
+                <textarea id="profile-description" placeholder="Описание профиля"></textarea>
+                <button id="update-description">Обновить описание</button>
             </div>
         </div>
 
@@ -40,6 +48,9 @@
                 window.location.href = 'login.html';
             } else {
                 document.getElementById('name').textContent = user.username;
+                document.getElementById('avatar').src = user.avatarURL || 'default-avatar.svg';
+                document.getElementById('profile-description').value = user.description || '';
+                document.getElementById('description').textContent = user.description || 'Описание профиля';
             }
 
             document.getElementById('add-post').addEventListener('click', async () => {
@@ -103,7 +114,6 @@
                     const posts = await response.json();
                     const postsContainer = document.getElementById('user-posts');
                     postsContainer.innerHTML = '';
-
                     if (posts.length === 0) {
                         postsContainer.innerHTML = "<p>Нет постов.</p>";
                         return;
@@ -122,6 +132,7 @@
                             ${post.photoURL ? `<img src="${post.photoURL}" alt="Фотография к посту">` : ''}
                             <p>${post.text}</p>
                             <p>Опубликовано: ${new Date(post.date).toLocaleDateString()}</p>
+                            <button class="delete-post" data-post-id="${post.id}">Удалить</button>
                         `;
                         postRow.appendChild(postDiv);
                         postCount++;
@@ -144,6 +155,120 @@
                 }
             }
             loadUserPosts();
+
+            document.getElementById('update-avatar').addEventListener('click', async () => {
+                const fileInput = document.getElementById('avatar-upload');
+                const file = fileInput.files[0];
+
+                if (!file) {
+                    alert('Выберите файл для загрузки.');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const avatarURL = e.target.result;
+                    await updateAvatar(avatarURL);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            async function updateAvatar(avatarURL) {
+                try {
+                    const response = await fetch(`http://localhost:3001/users/${user.id}`);
+                    if (!response.ok) {
+                        throw new Error(`Ошибка получения данных пользователя: ${response.status}`);
+                    }
+                    let userData = await response.json();
+
+                    userData.avatarURL = avatarURL;
+
+                    const updateResponse = await fetch(`http://localhost:3001/users/${user.id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(userData)
+                    });
+
+                    if (!updateResponse.ok) {
+                        throw new Error(`Ошибка обновления пользователя: ${updateResponse.status}`);
+                    }
+
+                    const updatedUser = await updateResponse.json();
+                    localStorage.setItem('user', JSON.stringify(updatedUser));
+                    document.getElementById('avatar').src = updatedUser.avatarURL;
+                    alert('Аватар обновлен!');
+                } catch (error) {
+                    console.error('Ошибка обновления аватара:', error);
+                    alert('Ошибка обновления аватара: ' + error.message);
+                }
+            }
+
+            document.getElementById('update-description').addEventListener('click', async () => {
+                const newDescription = document.getElementById('profile-description').value;
+                await updateProfileDescription(newDescription);
+            });
+
+            async function updateProfileDescription(newDescription) {
+                try {
+                    const response = await fetch(`http://localhost:3001/users/${user.id}`);
+                    if (!response.ok) {
+                        throw new Error(`Ошибка получения данных пользователя: ${response.status}`);
+                    }
+                    let userData = await response.json();
+
+                    userData.description = newDescription;
+
+                    const updateResponse = await fetch(`http://localhost:3001/users/${user.id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(userData)
+                    });
+
+                    if (!updateResponse.ok) {
+                        throw new Error(`Ошибка обновления пользователя: ${updateResponse.status}`);
+                    }
+
+                    const updatedUser = await updateResponse.json();
+                    localStorage.setItem('user', JSON.stringify(updatedUser));
+                    document.getElementById('description').textContent = updatedUser.description;
+                    document.getElementById('profile-description').value = updatedUser.description;
+                    alert('Описание обновлено!');
+                } catch (error) {
+                    console.error('Ошибка обновления описания:', error);
+                    alert('Ошибка обновления описания: ' + error.message);
+                }
+            }
+
+            document.getElementById('user-posts').addEventListener('click', async (event) => {
+                if (event.target.classList.contains('delete-post')) {
+                    const postId = event.target.dataset.postId;
+                    if (confirm(`Вы уверены, что хотите удалить пост?`)) {
+                        await deletePost(postId);
+                    }
+                }
+            });
+
+            async function deletePost(postId) {
+                try {
+                    const response = await fetch(`http://localhost:3001/posts/${postId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Ошибка удаления поста: ${response.status}`);
+                    }
+
+                    loadUserPosts();
+                    alert('Пост удалён!');
+                } catch (error) {
+                    console.error('Ошибка удаления поста:', error);
+                    alert('Ошибка удаления поста: ' + error.message);
+                }
+            }
         </script>
     </main>
 </body>

@@ -18,14 +18,66 @@
     </header>
     <main>
         <h2>Поиск</h2>
-        <input type="text" id="search-input" placeholder="Введите запрос">
-        <div id="search-results">
-        </div>
+        <input type="text" id="search-input" placeholder="Введите имя пользователя">
+        <button id="search-button">Найти</button>
+        <div id="search-results"></div>
         <script>
             document.getElementById('logout-link').addEventListener('click', () => {
                 localStorage.removeItem('user');
                 window.location.href = 'login.html';
             });
+
+            document.getElementById('search-button').addEventListener('click', async () => {
+                const username = document.getElementById('search-input').value;
+                if (username.trim() === '') return;
+
+                try {
+                    const response = await fetch(`http://localhost:3001/users?username=${username}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error fetching users: ${response.status}`);
+                    }
+                    const users = await response.json();
+
+                    if (users.length === 0) {
+                        document.getElementById('search-results').innerHTML = "<p>Пользователь не найден.</p>";
+                        return;
+                    }
+                    const userId = users[0].id;
+
+                    const postsResponse = await fetch(`http://localhost:3001/posts?userId=${userId}`);
+                    if (!postsResponse.ok) {
+                        throw new Error(`HTTP error fetching posts: ${postsResponse.status}`);
+                    }
+                    const posts = await postsResponse.json();
+                    displaySearchResults(posts, users);
+
+                } catch (error) {
+                    console.error('Error searching:', error);
+                    document.getElementById('search-results').innerHTML = `<p>Ошибка поиска: ${error.message}</p>`;
+                }
+            });
+
+            function displaySearchResults(posts, users) {
+                const resultsContainer = document.getElementById('search-results');
+                resultsContainer.innerHTML = '';
+
+                if (posts.length === 0) {
+                    resultsContainer.innerHTML = "<p>Нет постов от этого пользователя.</p>";
+                    return;
+                }
+
+                posts.forEach(post => {
+                    const postDiv = document.createElement('div');
+                    postDiv.classList.add('post');
+                    let postHTML = `<h3>Post by ${users[0].username}</h3>`;
+                    if (post.photoURL) {
+                        postHTML += `<img src="${post.photoURL}" alt="Фотография к посту">`;
+                    }
+                    postHTML += `<p>${post.text}</p>`;
+                    postDiv.innerHTML = postHTML;
+                    resultsContainer.appendChild(postDiv);
+                });
+            }
         </script>
     </main>
 </body>

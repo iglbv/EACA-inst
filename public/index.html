@@ -21,6 +21,8 @@
         <h2>Главная лента</h2>
         <div id="posts"></div>
         <script>
+            let user;
+
             async function loadPosts() {
                 try {
                     const responsePosts = await fetch('http://localhost:3001/posts');
@@ -33,6 +35,13 @@
                         throw new Error(`HTTP error fetching users: ${responseUsers.status}`);
                     }
                     const users = await responseUsers.json();
+
+                    user = JSON.parse(localStorage.getItem('user'));
+                    if (!user) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
                     const postsContainer = document.getElementById('posts');
                     postsContainer.innerHTML = '';
 
@@ -44,13 +53,13 @@
                     posts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
                     posts.forEach(post => {
-                        const user = users.find(user => user.id === post.userId);
+                        const userFromPosts = users.find(user => user.id === post.userId);
                         const postDiv = document.createElement('div');
                         postDiv.classList.add('post');
                         postDiv.innerHTML = `
                             <div class="post-header">
-                                <img src="${user?.avatarURL || 'default-avatar.svg'}" alt="Аватар пользователя">
-                                <h3>${user ? user.username : 'Unknown User'}</h3>
+                                <img src="${userFromPosts?.avatarURL || 'default-avatar.svg'}" alt="Аватар пользователя">
+                                <h3>${userFromPosts ? userFromPosts.username : 'Unknown User'}</h3>
                             </div>
                             ${post.photoURL ? `<img src="${post.photoURL}" alt="Фотография к посту">` : ''}
                             <p>${post.text}</p>
@@ -65,6 +74,10 @@
                 }
             }
             loadPosts();
+
+            window.addEventListener('userUpdated', (event) => {
+                loadPosts();
+            });
 
             document.getElementById('logout-link').addEventListener('click', () => {
                 localStorage.removeItem('user');
