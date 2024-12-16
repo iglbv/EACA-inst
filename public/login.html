@@ -22,7 +22,7 @@
                 const password = document.getElementById('login-password').value;
 
                 try {
-                    const response = await fetch('http://localhost:3001/users');
+                    const response = await fetch('/users');
                     const users = await response.json();
                     const user = users.find(user => user.username === username && user.password === password);
                     if (user) {

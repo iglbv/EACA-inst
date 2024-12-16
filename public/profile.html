@@ -76,7 +76,7 @@
 
                 async function sendPost(photoURL, postText, userId, currentDate) {
                     try {
-                        const response = await fetch('http://localhost:3001/posts', {
+                        const response = await fetch('/posts', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -107,7 +107,7 @@
 
             async function loadUserPosts() {
                 try {
-                    const response = await fetch(`http://localhost:3001/posts?userId=${user.id}`);
+                    const response = await fetch(`/posts?userId=${user.id}`);
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
@@ -175,7 +175,7 @@
 
             async function updateAvatar(avatarURL) {
                 try {
-                    const response = await fetch(`http://localhost:3001/users/${user.id}`);
+                    const response = await fetch(`/users/${user.id}`);
                     if (!response.ok) {
                         throw new Error(`Ошибка получения данных пользователя: ${response.status}`);
                     }
@@ -183,7 +183,7 @@
 
                     userData.avatarURL = avatarURL;
 
-                    const updateResponse = await fetch(`http://localhost:3001/users/${user.id}`, {
+                    const updateResponse = await fetch(`/users/${user.id}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json'
@@ -212,7 +212,7 @@
 
             async function updateProfileDescription(newDescription) {
                 try {
-                    const response = await fetch(`http://localhost:3001/users/${user.id}`);
+                    const response = await fetch(`/users/${user.id}`);
                     if (!response.ok) {
                         throw new Error(`Ошибка получения данных пользователя: ${response.status}`);
                     }
@@ -220,7 +220,7 @@
 
                     userData.description = newDescription;
 
-                    const updateResponse = await fetch(`http://localhost:3001/users/${user.id}`, {
+                    const updateResponse = await fetch(`/users/${user.id}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json'
@@ -254,7 +254,7 @@
 
             async function deletePost(postId) {
                 try {
-                    const response = await fetch(`http://localhost:3001/posts/${postId}`, {
+                    const response = await fetch(`/posts/${postId}`, {
                         method: 'DELETE'
                     });
 

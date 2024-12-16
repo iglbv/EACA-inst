@@ -32,7 +32,7 @@
                 if (username.trim() === '') return;
 
                 try {
-                    const response = await fetch(`http://localhost:3001/users?username=${username}`);
+                    const response = await fetch(`/users?username=${username}`);
                     if (!response.ok) {
                         throw new Error(`HTTP error fetching users: ${response.status}`);
                     }
@@ -44,7 +44,7 @@
                     }
                     const userId = users[0].id;
 
-                    const postsResponse = await fetch(`http://localhost:3001/posts?userId=${userId}`);
+                    const postsResponse = await fetch(`/posts?userId=${userId}`);
                     if (!postsResponse.ok) {
                         throw new Error(`HTTP error fetching posts: ${postsResponse.status}`);
                     }

@@ -25,12 +25,12 @@
 
             async function loadPosts() {
                 try {
-                    const responsePosts = await fetch('http://localhost:3001/posts');
+                    const responsePosts = await fetch('/posts');
                     if (!responsePosts.ok) {
                         throw new Error(`HTTP error fetching posts: ${responsePosts.status}`);
                     }
                     const posts = await responsePosts.json();
-                    const responseUsers = await fetch('http://localhost:3001/users');
+                    const responseUsers = await fetch('/users');
                     if (!responseUsers.ok) {
                         throw new Error(`HTTP error fetching users: ${responseUsers.status}`);
                     }
