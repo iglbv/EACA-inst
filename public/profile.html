@@ -19,7 +19,28 @@
     <main>
         <h2>Мой профиль</h2>
         <div id="profile-info">
+            <div class="avatar-container">
+                <img id="avatar" src="default-avatar.svg" alt="Аватар">
+                <input type="file" id="avatar-upload" accept="image/*">
+                <button id="update-avatar">Обновить аватар</button>
+            </div>
+            <div class="profile-details-container">
+                <div class="profile-details">
+                    <p><strong>Имя:</strong> <span id="name"></span></p>
+                    <p><strong>Описание:</strong> <span id="description">Описание профиля</span></p>
+                </div>
+                <textarea id="profile-description" placeholder="Описание профиля"></textarea>
+                <button id="update-description">Обновить описание</button>
+            </div>
         </div>
+
+        <h3>Добавить публикацию</h3>
+        <input type="file" id="post-photo-upload" accept="image/*">
+        <textarea id="post-text" placeholder="Текст публикации"></textarea>
+        <button id="add-post">Добавить</button>
+
+        <h3>Мои публикации</h3>
+        <div id="user-posts"></div>
 
         <script>
             let postsData;
@@ -185,7 +206,6 @@
                 alert('Пост удалён!');
             }
         </script>
-
     </main>
 </body>
 
