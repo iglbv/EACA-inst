@@ -98,7 +98,7 @@
                         date: currentDate
                     };
                     postsData.push(newPost);
-                    saveData(); // Сохраняем данные после добавления поста
+                    saveData();
                     loadUserPosts();
                     document.getElementById('post-text').value = '';
                     document.getElementById('post-photo-upload').value = '';
@@ -171,7 +171,7 @@
             async function updateAvatar(avatarURL) {
                 const userIndex = usersData.findIndex(u => u.id === user.id);
                 usersData[userIndex].avatarURL = avatarURL;
-                saveData(); //  <--- Здесь добавлено сохранение данных
+                saveData();
                 document.getElementById('avatar').src = avatarURL;
                 alert('Аватар обновлен!');
             }
@@ -184,7 +184,7 @@
             async function updateProfileDescription(newDescription) {
                 const userIndex = usersData.findIndex(u => u.id === user.id);
                 usersData[userIndex].description = newDescription;
-                saveData(); //  <--- Здесь добавлено сохранение данных
+                saveData();
                 document.getElementById('description').textContent = newDescription;
                 document.getElementById('profile-description').value = newDescription;
                 alert('Описание обновлено!');

@@ -45,7 +45,7 @@ nav a:hover {
 main {
     padding: 2rem;
     max-width: 960px;
-   
+
     margin: 0 auto;
 }
 
@@ -194,7 +194,7 @@ button:hover {
 
 #profile-info {
     display: flex;
-    gap: 2rem;   
+    gap: 2rem;
     margin-bottom: 2rem;
 }
 
@@ -219,7 +219,7 @@ button:hover {
     margin-bottom: 0.2rem;
 }
 
-.profile-details-container {   
+.profile-details-container {
     flex: 1;
 }
 
@@ -354,7 +354,7 @@ textarea#profile-description {
     max-width: 100%;
     height: auto;
     margin-bottom: 10px;
-   
+
 }
 
 @media (max-width: 768px) {
