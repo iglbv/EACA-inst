@@ -19,30 +19,22 @@
     <main>
         <h2>Мой профиль</h2>
         <div id="profile-info">
-            <div class="avatar-container">
-                <img id="avatar" src="default-avatar.svg" alt="Аватар">
-                <input type="file" id="avatar-upload" accept="image/*">
-                <button id="update-avatar">Обновить аватар</button>
-            </div>
-            <div class="profile-details-container">
-                <div class="profile-details">
-                    <p><strong>Имя:</strong> <span id="name"></span></p>
-                    <p><strong>Описание:</strong> <span id="description">Описание профиля</span></p>
-                </div>
-                <textarea id="profile-description" placeholder="Описание профиля"></textarea>
-                <button id="update-description">Обновить описание</button>
-            </div>
         </div>
 
-        <h3>Добавить публикацию</h3>
-        <input type="file" id="post-photo-upload" accept="image/*">
-        <textarea id="post-text" placeholder="Текст публикации"></textarea>
-        <button id="add-post">Добавить</button>
-
-        <h3>Мои публикации</h3>
-        <div id="user-posts"></div>
-
         <script>
+            let postsData;
+            let usersData;
+
+            function loadInitialData() {
+                postsData = JSON.parse(localStorage.getItem('posts')) || [];
+                usersData = JSON.parse(localStorage.getItem('users')) || [];
+            }
+
+            function saveData() {
+                localStorage.setItem('posts', JSON.stringify(postsData));
+                localStorage.setItem('users', JSON.stringify(usersData));
+            }
+
             const user = JSON.parse(localStorage.getItem('user'));
             if (!user) {
                 window.location.href = 'login.html';
@@ -52,6 +44,8 @@
                 document.getElementById('profile-description').value = user.description || '';
                 document.getElementById('description').textContent = user.description || 'Описание профиля';
             }
+
+            loadInitialData();
 
             document.getElementById('add-post').addEventListener('click', async () => {
                 const fileInput = document.getElementById('post-photo-upload');
@@ -75,28 +69,18 @@
                 }
 
                 async function sendPost(photoURL, postText, userId, currentDate) {
-                    try {
-                        const response = await fetch('/posts', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                text: postText,
-                                userId: userId,
-                                photoURL: photoURL,
-                                date: currentDate
-                            })
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        loadUserPosts();
-                        document.getElementById('post-text').value = '';
-                        document.getElementById('post-photo-upload').value = '';
-                    } catch (error) {
-                        console.error('Error adding post:', error);
-                        alert('Ошибка добавления поста: ' + error.message);
-                    }
+                    const newPost = {
+                        id: postsData.length > 0 ? Math.max(...postsData.map(post => post.id)) + 1 : 1,
+                        text: postText,
+                        userId: userId,
+                        photoURL: photoURL,
+                        date: currentDate
+                    };
+                    postsData.push(newPost);
+                    saveData();
+                    loadUserPosts();
+                    document.getElementById('post-text').value = '';
+                    document.getElementById('post-photo-upload').value = '';
                 }
             });
 
@@ -106,52 +90,42 @@
             });
 
             async function loadUserPosts() {
-                try {
-                    const response = await fetch(`/posts?userId=${user.id}`);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    const posts = await response.json();
-                    const postsContainer = document.getElementById('user-posts');
-                    postsContainer.innerHTML = '';
-                    if (posts.length === 0) {
-                        postsContainer.innerHTML = "<p>Нет постов.</p>";
-                        return;
-                    }
+                const postsContainer = document.getElementById('user-posts');
+                postsContainer.innerHTML = '';
+                const userPosts = postsData.filter(post => post.userId === user.id);
+                if (userPosts.length === 0) {
+                    postsContainer.innerHTML = "<p>Нет постов.</p>";
+                    return;
+                }
 
-                    posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+                userPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-                    let postRow = document.createElement('div');
-                    postRow.classList.add('post-row');
-                    let postCount = 0;
+                let postRow = document.createElement('div');
+                postRow.classList.add('post-row');
+                let postCount = 0;
 
-                    posts.forEach(post => {
-                        const postDiv = document.createElement('div');
-                        postDiv.classList.add('post');
-                        postDiv.innerHTML = `
-                            ${post.photoURL ? `<img src="${post.photoURL}" alt="Фотография к посту">` : ''}
-                            <p>${post.text}</p>
-                            <p>Опубликовано: ${new Date(post.date).toLocaleDateString()}</p>
-                            <button class="delete-post" data-post-id="${post.id}">Удалить</button>
-                        `;
-                        postRow.appendChild(postDiv);
-                        postCount++;
+                userPosts.forEach(post => {
+                    const postDiv = document.createElement('div');
+                    postDiv.classList.add('post');
+                    postDiv.innerHTML = `
+                        ${post.photoURL ? `<img src="${post.photoURL}" alt="Фотография к посту">` : ''}
+                        <p>${post.text}</p>
+                        <p>Опубликовано: ${new Date(post.date).toLocaleDateString()}</p>
+                        <button class="delete-post" data-post-id="${post.id}">Удалить</button>
+                    `;
+                    postRow.appendChild(postDiv);
+                    postCount++;
 
-                        if (postCount === 3) {
-                            postsContainer.appendChild(postRow);
-                            postRow = document.createElement('div');
-                            postRow.classList.add('post-row');
-                            postCount = 0;
-                        }
-                    });
-
-                    if (postCount > 0) {
+                    if (postCount === 3) {
                         postsContainer.appendChild(postRow);
+                        postRow = document.createElement('div');
+                        postRow.classList.add('post-row');
+                        postCount = 0;
                     }
-                } catch (error) {
-                    console.error('Error loading user posts:', error);
-                    const postsContainer = document.getElementById('user-posts');
-                    postsContainer.innerHTML = `<p>Ошибка загрузки постов: ${error.message}</p>`;
+                });
+
+                if (postCount > 0) {
+                    postsContainer.appendChild(postRow);
                 }
             }
             loadUserPosts();
@@ -174,35 +148,11 @@
             });
 
             async function updateAvatar(avatarURL) {
-                try {
-                    const response = await fetch(`/users/${user.id}`);
-                    if (!response.ok) {
-                        throw new Error(`Ошибка получения данных пользователя: ${response.status}`);
-                    }
-                    let userData = await response.json();
-
-                    userData.avatarURL = avatarURL;
-
-                    const updateResponse = await fetch(`/users/${user.id}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(userData)
-                    });
-
-                    if (!updateResponse.ok) {
-                        throw new Error(`Ошибка обновления пользователя: ${updateResponse.status}`);
-                    }
-
-                    const updatedUser = await updateResponse.json();
-                    localStorage.setItem('user', JSON.stringify(updatedUser));
-                    document.getElementById('avatar').src = updatedUser.avatarURL;
-                    alert('Аватар обновлен!');
-                } catch (error) {
-                    console.error('Ошибка обновления аватара:', error);
-                    alert('Ошибка обновления аватара: ' + error.message);
-                }
+                const userIndex = usersData.findIndex(u => u.id === user.id);
+                usersData[userIndex].avatarURL = avatarURL;
+                localStorage.setItem('users', JSON.stringify(usersData));
+                document.getElementById('avatar').src = avatarURL;
+                alert('Аватар обновлен!');
             }
 
             document.getElementById('update-description').addEventListener('click', async () => {
@@ -211,36 +161,12 @@
             });
 
             async function updateProfileDescription(newDescription) {
-                try {
-                    const response = await fetch(`/users/${user.id}`);
-                    if (!response.ok) {
-                        throw new Error(`Ошибка получения данных пользователя: ${response.status}`);
-                    }
-                    let userData = await response.json();
-
-                    userData.description = newDescription;
-
-                    const updateResponse = await fetch(`/users/${user.id}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(userData)
-                    });
-
-                    if (!updateResponse.ok) {
-                        throw new Error(`Ошибка обновления пользователя: ${updateResponse.status}`);
-                    }
-
-                    const updatedUser = await updateResponse.json();
-                    localStorage.setItem('user', JSON.stringify(updatedUser));
-                    document.getElementById('description').textContent = updatedUser.description;
-                    document.getElementById('profile-description').value = updatedUser.description;
-                    alert('Описание обновлено!');
-                } catch (error) {
-                    console.error('Ошибка обновления описания:', error);
-                    alert('Ошибка обновления описания: ' + error.message);
-                }
+                const userIndex = usersData.findIndex(u => u.id === user.id);
+                usersData[userIndex].description = newDescription;
+                localStorage.setItem('users', JSON.stringify(usersData));
+                document.getElementById('description').textContent = newDescription;
+                document.getElementById('profile-description').value = newDescription;
+                alert('Описание обновлено!');
             }
 
             document.getElementById('user-posts').addEventListener('click', async (event) => {
@@ -253,23 +179,13 @@
             });
 
             async function deletePost(postId) {
-                try {
-                    const response = await fetch(`/posts/${postId}`, {
-                        method: 'DELETE'
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`Ошибка удаления поста: ${response.status}`);
-                    }
-
-                    loadUserPosts();
-                    alert('Пост удалён!');
-                } catch (error) {
-                    console.error('Ошибка удаления поста:', error);
-                    alert('Ошибка удаления поста: ' + error.message);
-                }
+                postsData = postsData.filter(post => post.id != postId);
+                saveData();
+                loadUserPosts();
+                alert('Пост удалён!');
             }
         </script>
+
     </main>
 </body>
 

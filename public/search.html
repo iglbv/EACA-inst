@@ -27,37 +27,24 @@
                 window.location.href = 'login.html';
             });
 
-            document.getElementById('search-button').addEventListener('click', async () => {
+            document.getElementById('search-button').addEventListener('click', () => {
                 const username = document.getElementById('search-input').value;
                 if (username.trim() === '') return;
 
-                try {
-                    const response = await fetch(`/users?username=${username}`);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error fetching users: ${response.status}`);
-                    }
-                    const users = await response.json();
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                const foundUser = users.find(user => user.username.toLowerCase().includes(username.toLowerCase()));
 
-                    if (users.length === 0) {
-                        document.getElementById('search-results').innerHTML = "<p>Пользователь не найден.</p>";
-                        return;
-                    }
-                    const userId = users[0].id;
-
-                    const postsResponse = await fetch(`/posts?userId=${userId}`);
-                    if (!postsResponse.ok) {
-                        throw new Error(`HTTP error fetching posts: ${postsResponse.status}`);
-                    }
-                    const posts = await postsResponse.json();
-                    displaySearchResults(posts, users);
-
-                } catch (error) {
-                    console.error('Error searching:', error);
-                    document.getElementById('search-results').innerHTML = `<p>Ошибка поиска: ${error.message}</p>`;
+                if (!foundUser) {
+                    document.getElementById('search-results').innerHTML = "<p>Пользователь не найден.</p>";
+                    return;
                 }
+
+                const posts = JSON.parse(localStorage.getItem('posts')) || [];
+                const userPosts = posts.filter(post => post.userId === foundUser.id);
+                displaySearchResults(userPosts, foundUser);
             });
 
-            function displaySearchResults(posts, users) {
+            function displaySearchResults(posts, user) {
                 const resultsContainer = document.getElementById('search-results');
                 resultsContainer.innerHTML = '';
 
@@ -69,7 +56,7 @@
                 posts.forEach(post => {
                     const postDiv = document.createElement('div');
                     postDiv.classList.add('post');
-                    let postHTML = `<h3>Post by ${users[0].username}</h3>`;
+                    let postHTML = `<h3>Post by ${user.username}</h3>`;
                     if (post.photoURL) {
                         postHTML += `<img src="${post.photoURL}" alt="Фотография к посту">`;
                     }

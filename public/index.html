@@ -22,57 +22,54 @@
         <div id="posts"></div>
         <script>
             let user;
+            let postsData;
+            let usersData;
 
-            async function loadPosts() {
-                try {
-                    const responsePosts = await fetch('/posts');
-                    if (!responsePosts.ok) {
-                        throw new Error(`HTTP error fetching posts: ${responsePosts.status}`);
-                    }
-                    const posts = await responsePosts.json();
-                    const responseUsers = await fetch('/users');
-                    if (!responseUsers.ok) {
-                        throw new Error(`HTTP error fetching users: ${responseUsers.status}`);
-                    }
-                    const users = await responseUsers.json();
-
-                    user = JSON.parse(localStorage.getItem('user'));
-                    if (!user) {
-                        window.location.href = 'login.html';
-                        return;
-                    }
-
-                    const postsContainer = document.getElementById('posts');
-                    postsContainer.innerHTML = '';
-
-                    if (posts.length === 0) {
-                        postsContainer.innerHTML = "<p>Нет постов.</p>";
-                        return;
-                    }
-
-                    posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-                    posts.forEach(post => {
-                        const userFromPosts = users.find(user => user.id === post.userId);
-                        const postDiv = document.createElement('div');
-                        postDiv.classList.add('post');
-                        postDiv.innerHTML = `
-                            <div class="post-header">
-                                <img src="${userFromPosts?.avatarURL || 'default-avatar.svg'}" alt="Аватар пользователя">
-                                <h3>${userFromPosts ? userFromPosts.username : 'Unknown User'}</h3>
-                            </div>
-                            ${post.photoURL ? `<img src="${post.photoURL}" alt="Фотография к посту">` : ''}
-                            <p>${post.text}</p>
-                            <p>Опубликовано: ${new Date(post.date).toLocaleDateString()}</p>
-                        `;
-                        postsContainer.appendChild(postDiv);
-                    });
-                } catch (error) {
-                    console.error('Error loading posts:', error);
-                    const postsContainer = document.getElementById('posts');
-                    postsContainer.innerHTML = `<p>Ошибка загрузки постов: ${error.message}</p>`;
-                }
+            function loadInitialData() {
+                postsData = JSON.parse(localStorage.getItem('posts')) || [];
+                usersData = JSON.parse(localStorage.getItem('users')) || [];
             }
+
+            function saveData() {
+                localStorage.setItem('posts', JSON.stringify(postsData));
+                localStorage.setItem('users', JSON.stringify(usersData));
+            }
+
+            function loadPosts() {
+                user = JSON.parse(localStorage.getItem('user'));
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                const postsContainer = document.getElementById('posts');
+                postsContainer.innerHTML = '';
+
+                if (postsData.length === 0) {
+                    postsContainer.innerHTML = "<p>Нет постов.</p>";
+                    return;
+                }
+
+                postsData.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                postsData.forEach(post => {
+                    const userFromPosts = usersData.find(user => user.id === post.userId);
+                    const postDiv = document.createElement('div');
+                    postDiv.classList.add('post');
+                    postDiv.innerHTML = `
+                        <div class="post-header">
+                            <img src="${userFromPosts?.avatarURL || 'default-avatar.svg'}" alt="Аватар пользователя">
+                            <h3>${userFromPosts ? userFromPosts.username : 'Unknown User'}</h3>
+                        </div>
+                        ${post.photoURL ? `<img src="${post.photoURL}" alt="Фотография к посту">` : ''}
+                        <p>${post.text}</p>
+                        <p>Опубликовано: ${new Date(post.date).toLocaleDateString()}</p>
+                    `;
+                    postsContainer.appendChild(postDiv);
+                });
+            }
+
+            loadInitialData();
             loadPosts();
 
             window.addEventListener('userUpdated', (event) => {

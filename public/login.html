@@ -16,24 +16,17 @@
         </form>
         <p>Нет аккаунта? <a href="register.html">Зарегистрируйтесь</a></p>
         <script>
-            document.getElementById('login-form').addEventListener('submit', async (e) => {
+            document.getElementById('login-form').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const username = document.getElementById('login-username').value;
                 const password = document.getElementById('login-password').value;
-
-                try {
-                    const response = await fetch('/users');
-                    const users = await response.json();
-                    const user = users.find(user => user.username === username && user.password === password);
-                    if (user) {
-                        localStorage.setItem('user', JSON.stringify(user));
-                        window.location.href = 'profile.html';
-                    } else {
-                        alert('Неверный логин или пароль');
-                    }
-                } catch (error) {
-                    console.error('Login error:', error);
-                    alert('Ошибка входа');
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                const user = users.find(user => user.username === username && user.password === password);
+                if (user) {
+                    localStorage.setItem('user', JSON.stringify(user));
+                    window.location.href = 'profile.html';
+                } else {
+                    alert('Неверный логин или пароль');
                 }
             });
         </script>
