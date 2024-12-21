@@ -36,6 +36,11 @@
                 const aboutSection = document.getElementById('about-us');
                 setTimeout(() => aboutSection.classList.add('show'), 100);
             });
+
+            document.getElementById('logout-link').addEventListener('click', () => {
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            });
         </script>
     </main>
 </body>
