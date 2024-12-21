@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>EACAgram - О нас</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <h1>EACAgram</h1>
+        <nav>
+            <a href="/">Главная</a>
+            <a href="profile.html">Профиль</a>
+            <a href="search.html">Поиск</a>
+            <a href="about.html">О нас</a>
+            <a href="#" id="logout-link">Выйти</a>
+        </nav>
+    </header>
+
+    <main>
+        <section id="about-us">
+            <h2>О нас</h2>
+            <p>EACAgram — это социальная сеть, созданная специально для сообщества ЕАСИ. Здесь вы можете загружать и
+                делиться своими фотографиями, а также следить за последними новостями и
+                событиями.</p>
+            <p>Наш сайт предоставляет следующие возможности:</p>
+            <ul>
+                <li>Загрузка и публикация фотографий.</li>
+                <li>Просмотр ленты новостей с фотографиями ваших друзей и коллег.</li>
+                <li>Создание личного профиля с описанием и аватаркой.</li>
+            </ul>
+        </section>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const aboutSection = document.getElementById('about-us');
+                setTimeout(() => aboutSection.classList.add('show'), 100);
+            });
+        </script>
+    </main>
+</body>
+
+</html>

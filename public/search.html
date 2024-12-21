@@ -13,6 +13,7 @@
             <a href="/">Главная</a>
             <a href="profile.html">Профиль</a>
             <a href="search.html">Поиск</a>
+            <a href="about.html">О нас</a>
             <a href="#" id="logout-link">Выйти</a>
         </nav>
     </header>
@@ -53,17 +54,29 @@
                     return;
                 }
 
+                let resultHTML = `
+                    <div class="search-user-info">
+                        <h3>${user.username}</h3>
+                        <p>Описание: ${user.description || 'Описание отсутствует'}</p>
+                        <div class="social-links">
+                            ${user.vkLink ? `ВКонтакте: ${user.vkLink}` : ''}
+                            ${user.telegramLink ? `<br>Telegram: ${user.telegramLink}` : ''}
+                        </div>
+                    </div>
+                `;
+
                 posts.forEach(post => {
-                    const postDiv = document.createElement('div');
-                    postDiv.classList.add('post');
-                    let postHTML = `<h3>Post by ${user.username}</h3>`;
-                    if (post.photoURL) {
-                        postHTML += `<img src="${post.photoURL}" alt="Фотография к посту">`;
-                    }
-                    postHTML += `<p>${post.text}</p>`;
-                    postDiv.innerHTML = postHTML;
-                    resultsContainer.appendChild(postDiv);
+                    let postHTML = `
+                        <div class="post">
+                            ${post.photoURL ? `<img src="${post.photoURL}" alt="Фотография к посту">` : ''}
+                            <p>${post.text}</p>
+                            <p>Опубликовано: ${new Date(post.date).toLocaleDateString()}</p>
+                        </div>
+                    `;
+                    resultHTML += postHTML;
                 });
+
+                resultsContainer.innerHTML = resultHTML;
             }
         </script>
     </main>

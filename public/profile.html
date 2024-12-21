@@ -13,6 +13,7 @@
             <a href="/">Главная</a>
             <a href="profile.html">Профиль</a>
             <a href="search.html">Поиск</a>
+            <a href="about.html">О нас</a>
             <a href="#" id="logout-link">Выйти</a>
         </nav>
     </header>
@@ -31,6 +32,22 @@
                 </div>
                 <textarea id="profile-description" placeholder="Описание профиля"></textarea>
                 <button id="update-description">Обновить описание</button>
+            </div>
+            <div class="social-links">
+                <h3>Ссылки на соцсети</h3>
+                <div class="social-link-row">
+                    <div class="social-link">
+                        <label for="vk-link">ВКонтакте: <img src="vk-icon.png" alt="ВКонтакте"></label>
+                        <input type="url" id="vk-link" name="vk-link" placeholder="Ссылка на ВКонтакте">
+                        <span id="vk-link-display"></span>
+                    </div>
+                    <div class="social-link">
+                        <label for="telegram-link">Telegram: <img src="telegram-icon.png" alt="Telegram"></label>
+                        <input type="url" id="telegram-link" name="telegram-link" placeholder="Ссылка на Telegram">
+                        <span id="telegram-link-display"></span>
+                    </div>
+                </div>
+                <button id="update-social-links">Сохранить изменения</button>
             </div>
         </div>
 
@@ -54,19 +71,65 @@
             function saveData() {
                 localStorage.setItem('posts', JSON.stringify(postsData));
                 localStorage.setItem('users', JSON.stringify(usersData));
+                localStorage.setItem('user', JSON.stringify(user));
             }
 
             const user = JSON.parse(localStorage.getItem('user'));
             if (!user) {
                 window.location.href = 'login.html';
-            } else {
+            }
+
+            loadInitialData();
+
+
+            const vkLinkInput = document.getElementById('vk-link');
+            const telegramLinkInput = document.getElementById('telegram-link');
+            const vkLinkDisplay = document.getElementById('vk-link-display');
+            const telegramLinkDisplay = document.getElementById('telegram-link-display');
+
+            function updateLinkDisplay(linkInput, linkDisplay) {
+                linkDisplay.textContent = linkInput.value ? linkInput.value : "";
+            }
+
+            vkLinkInput.addEventListener('input', () => updateLinkDisplay(vkLinkInput, vkLinkDisplay));
+            telegramLinkInput.addEventListener('input', () => updateLinkDisplay(telegramLinkInput, telegramLinkDisplay));
+
+
+            document.getElementById('update-social-links').addEventListener('click', async () => {
+                const vkLink = vkLinkInput.value;
+                const telegramLink = telegramLinkInput.value;
+
+                if (!vkLink && !telegramLink) {
+                    alert('Пожалуйста, введите хотя бы одну ссылку.');
+                    return;
+                }
+
+                await updateSocialLinks(vkLink, telegramLink);
+            });
+
+
+            async function updateSocialLinks(vkLink, telegramLink) {
+                const userIndex = usersData.findIndex(u => u.id === user.id);
+                if (userIndex === -1) return;
+                usersData[userIndex].vkLink = vkLink;
+                usersData[userIndex].telegramLink = telegramLink;
+                user.vkLink = vkLink;
+                user.telegramLink = telegramLink;
+                saveData();
+                alert('Ссылки обновлены!');
+            }
+
+            if (user) {
                 document.getElementById('name').textContent = user.username;
                 document.getElementById('avatar').src = user.avatarURL || 'default-avatar.svg';
                 document.getElementById('profile-description').value = user.description || '';
                 document.getElementById('description').textContent = user.description || 'Описание профиля';
+                vkLinkInput.value = user.vkLink || '';
+                telegramLinkInput.value = user.telegramLink || '';
+                updateLinkDisplay(vkLinkInput, vkLinkDisplay);
+                updateLinkDisplay(telegramLinkInput, telegramLinkDisplay);
             }
 
-            loadInitialData();
 
             document.getElementById('add-post').addEventListener('click', async () => {
                 const fileInput = document.getElementById('post-photo-upload');
@@ -129,11 +192,11 @@
                     const postDiv = document.createElement('div');
                     postDiv.classList.add('post');
                     postDiv.innerHTML = `
-                        ${post.photoURL ? `<img src="${post.photoURL}" alt="Фотография к посту">` : ''}
-                        <p>${post.text}</p>
-                        <p>Опубликовано: ${new Date(post.date).toLocaleDateString()}</p>
-                        <button class="delete-post" data-post-id="${post.id}">Удалить</button>
-                    `;
+            ${post.photoURL ? `<img src="${post.photoURL}" alt="Фотография к посту">` : ''}
+            <p>${post.text}</p>
+            <p>Опубликовано: ${new Date(post.date).toLocaleDateString()}</p>
+            <button class="delete-post" data-post-id="${post.id}">Удалить</button>
+        `;
                     postRow.appendChild(postDiv);
                     postCount++;
 
@@ -171,6 +234,7 @@
             async function updateAvatar(avatarURL) {
                 const userIndex = usersData.findIndex(u => u.id === user.id);
                 usersData[userIndex].avatarURL = avatarURL;
+                user.avatarURL = avatarURL;
                 saveData();
                 document.getElementById('avatar').src = avatarURL;
                 alert('Аватар обновлен!');
@@ -184,6 +248,7 @@
             async function updateProfileDescription(newDescription) {
                 const userIndex = usersData.findIndex(u => u.id === user.id);
                 usersData[userIndex].description = newDescription;
+                user.description = newDescription;
                 saveData();
                 document.getElementById('description').textContent = newDescription;
                 document.getElementById('profile-description').value = newDescription;
@@ -205,6 +270,7 @@
                 loadUserPosts();
                 alert('Пост удалён!');
             }
+
         </script>
     </main>
 </body>
