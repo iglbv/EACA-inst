@@ -15,6 +15,7 @@
             <button type="submit">Войти</button>
         </form>
         <p>Нет аккаунта? <a href="register.html">Зарегистрируйтесь</a></p>
+        <button id="login-as-guest">Войти как наблюдатель</button>
         <script>
             document.getElementById('login-form').addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -28,6 +29,16 @@
                 } else {
                     alert('Неверный логин или пароль');
                 }
+            });
+            document.getElementById('login-as-guest').addEventListener('click', () => {
+                const guestUser = {
+                    id: 'guest',
+                    username: 'Guest',
+                    description: 'Наблюдатель',
+                    avatarURL: 'default-avatar.svg',
+                }
+                localStorage.setItem('user', JSON.stringify(guestUser));
+                window.location.href = 'profile.html';
             });
         </script>
     </div>

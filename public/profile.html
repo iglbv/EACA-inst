@@ -18,54 +18,62 @@
         </nav>
     </header>
     <main>
-        <h2>Мой профиль</h2>
-        <div id="profile-info">
-            <div class="avatar-container">
-                <img id="avatar" src="default-avatar.svg" alt="Аватар">
-                <input type="file" id="avatar-upload" accept="image/*">
-                <button id="update-avatar">Обновить аватар</button>
-            </div>
-            <div class="profile-details-container">
-                <div class="profile-details">
-                    <p><strong>Имя:</strong> <span id="name"></span></p>
-                    <p><strong>Описание:</strong> <span id="description">Описание профиля</span></p>
+        <div id="profile-content">
+            <h2>Мой профиль</h2>
+            <div id="profile-info">
+                <div class="avatar-container">
+                    <img id="avatar" src="default-avatar.svg" alt="Аватар">
+                    <input type="file" id="avatar-upload" accept="image/*">
+                    <button id="update-avatar">Обновить аватар</button>
                 </div>
-                <textarea id="profile-description" placeholder="Описание профиля"></textarea>
-                <button id="update-description">Обновить описание</button>
-            </div>
-            <div class="social-links">
-                <h3>Ссылки на соцсети</h3>
-                <div class="social-link-row">
-                    <div class="social-link">
-                        <label for="vk-link">ВКонтакте: <img src="vk-icon.png" alt="ВКонтакте"></label>
-                        <input type="url" id="vk-link" name="vk-link" placeholder="Ссылка на ВКонтакте">
-                        <span id="vk-link-display"></span>
+                <div class="profile-details-container">
+                    <div class="profile-details">
+                        <p><strong>Имя:</strong> <span id="name"></span></p>
+                        <p><strong>Описание:</strong> <span id="description">Описание профиля</span></p>
                     </div>
-                    <div class="social-link">
-                        <label for="telegram-link">Telegram: <img src="telegram-icon.png" alt="Telegram"></label>
-                        <input type="url" id="telegram-link" name="telegram-link" placeholder="Ссылка на Telegram">
-                        <span id="telegram-link-display"></span>
-                    </div>
+                    <textarea id="profile-description" placeholder="Описание профиля"></textarea>
+                    <button id="update-description">Обновить описание</button>
                 </div>
-                <button id="update-social-links">Сохранить изменения</button>
+                <div class="social-links">
+                    <h3>Ссылки на соцсети</h3>
+                    <div class="social-link-row">
+                        <div class="social-link">
+                            <label for="vk-link">ВКонтакте: <img src="vk-icon.png" alt="ВКонтакте"></label>
+                            <input type="url" id="vk-link" name="vk-link" placeholder="Ссылка на ВКонтакте">
+                            <span id="vk-link-display"></span>
+                        </div>
+                        <div class="social-link">
+                            <label for="telegram-link">Telegram: <img src="telegram-icon.png" alt="Telegram"></label>
+                            <input type="url" id="telegram-link" name="telegram-link" placeholder="Ссылка на Telegram">
+                            <span id="telegram-link-display"></span>
+                        </div>
+                    </div>
+                    <button id="update-social-links">Сохранить изменения</button>
+                </div>
             </div>
+
+            <h3>Добавить публикацию</h3>
+            <input type="file" id="post-photo-upload" accept="image/*">
+            <textarea id="post-text" placeholder="Текст публикации"></textarea>
+            <button id="add-post">Добавить</button>
+
+            <h3>Мои публикации</h3>
+            <div id="user-posts"></div>
         </div>
-
-        <h3>Добавить публикацию</h3>
-        <input type="file" id="post-photo-upload" accept="image/*">
-        <textarea id="post-text" placeholder="Текст публикации"></textarea>
-        <button id="add-post">Добавить</button>
-
-        <h3>Мои публикации</h3>
-        <div id="user-posts"></div>
-
+        <div id="auth-prompt" style="display: none;">
+            <p>Для просмотра профиля необходимо авторизоваться или зарегистрироваться.</p>
+            <a href="login.html">Войти</a>
+            <a href="register.html">Зарегистрироваться</a>
+        </div>
         <script>
             let postsData;
             let usersData;
+            let user;
 
             function loadInitialData() {
                 postsData = JSON.parse(localStorage.getItem('posts')) || [];
                 usersData = JSON.parse(localStorage.getItem('users')) || [];
+                user = JSON.parse(localStorage.getItem('user'));
             }
 
             function saveData() {
@@ -73,202 +81,206 @@
                 localStorage.setItem('users', JSON.stringify(usersData));
                 localStorage.setItem('user', JSON.stringify(user));
             }
-
-            const user = JSON.parse(localStorage.getItem('user'));
-            if (!user) {
-                window.location.href = 'login.html';
-            }
+            const profileContent = document.getElementById('profile-content');
+            const authPrompt = document.getElementById('auth-prompt');
 
             loadInitialData();
 
-
-            const vkLinkInput = document.getElementById('vk-link');
-            const telegramLinkInput = document.getElementById('telegram-link');
-            const vkLinkDisplay = document.getElementById('vk-link-display');
-            const telegramLinkDisplay = document.getElementById('telegram-link-display');
-
-            function updateLinkDisplay(linkInput, linkDisplay) {
-                linkDisplay.textContent = linkInput.value ? linkInput.value : "";
-            }
-
-            vkLinkInput.addEventListener('input', () => updateLinkDisplay(vkLinkInput, vkLinkDisplay));
-            telegramLinkInput.addEventListener('input', () => updateLinkDisplay(telegramLinkInput, telegramLinkDisplay));
+            if (!user || user.id === 'guest') {
+                profileContent.style.display = 'none';
+                authPrompt.style.display = 'block';
+            } else {
+                profileContent.style.display = 'block';
+                authPrompt.style.display = 'none';
 
 
-            document.getElementById('update-social-links').addEventListener('click', async () => {
-                const vkLink = vkLinkInput.value;
-                const telegramLink = telegramLinkInput.value;
+                const vkLinkInput = document.getElementById('vk-link');
+                const telegramLinkInput = document.getElementById('telegram-link');
+                const vkLinkDisplay = document.getElementById('vk-link-display');
+                const telegramLinkDisplay = document.getElementById('telegram-link-display');
 
-                if (!vkLink && !telegramLink) {
-                    alert('Пожалуйста, введите хотя бы одну ссылку.');
-                    return;
+                function updateLinkDisplay(linkInput, linkDisplay) {
+                    linkDisplay.textContent = linkInput.value ? linkInput.value : "";
                 }
 
-                await updateSocialLinks(vkLink, telegramLink);
-            });
+                vkLinkInput.addEventListener('input', () => updateLinkDisplay(vkLinkInput, vkLinkDisplay));
+                telegramLinkInput.addEventListener('input', () => updateLinkDisplay(telegramLinkInput, telegramLinkDisplay));
+
+                document.getElementById('update-social-links').addEventListener('click', async () => {
+                    const vkLink = vkLinkInput.value;
+                    const telegramLink = telegramLinkInput.value;
+
+                    if (!vkLink && !telegramLink) {
+                        alert('Пожалуйста, введите хотя бы одну ссылку.');
+                        return;
+                    }
+
+                    await updateSocialLinks(vkLink, telegramLink);
+                });
 
 
-            async function updateSocialLinks(vkLink, telegramLink) {
-                const userIndex = usersData.findIndex(u => u.id === user.id);
-                if (userIndex === -1) return;
-                usersData[userIndex].vkLink = vkLink;
-                usersData[userIndex].telegramLink = telegramLink;
-                user.vkLink = vkLink;
-                user.telegramLink = telegramLink;
-                saveData();
-                alert('Ссылки обновлены!');
-            }
-
-            if (user) {
-                document.getElementById('name').textContent = user.username;
-                document.getElementById('avatar').src = user.avatarURL || 'default-avatar.svg';
-                document.getElementById('profile-description').value = user.description || '';
-                document.getElementById('description').textContent = user.description || 'Описание профиля';
-                vkLinkInput.value = user.vkLink || '';
-                telegramLinkInput.value = user.telegramLink || '';
-                updateLinkDisplay(vkLinkInput, vkLinkDisplay);
-                updateLinkDisplay(telegramLinkInput, telegramLinkDisplay);
-            }
-
-
-            document.getElementById('add-post').addEventListener('click', async () => {
-                const fileInput = document.getElementById('post-photo-upload');
-                const file = fileInput.files[0];
-                const postText = document.getElementById('post-text').value;
-                const userId = user.id;
-                const currentDate = new Date().toISOString();
-
-                if (postText.trim() === '') return;
-
-                let photoURL = '';
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = async (e) => {
-                        photoURL = e.target.result;
-                        await sendPost(photoURL, postText, userId, currentDate);
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    await sendPost('', postText, userId, currentDate);
-                }
-
-                async function sendPost(photoURL, postText, userId, currentDate) {
-                    const newPost = {
-                        id: postsData.length > 0 ? Math.max(...postsData.map(post => post.id)) + 1 : 1,
-                        text: postText,
-                        userId: userId,
-                        photoURL: photoURL,
-                        date: currentDate
-                    };
-                    postsData.push(newPost);
+                async function updateSocialLinks(vkLink, telegramLink) {
+                    const userIndex = usersData.findIndex(u => u.id === user.id);
+                    if (userIndex === -1) return;
+                    usersData[userIndex].vkLink = vkLink;
+                    usersData[userIndex].telegramLink = telegramLink;
+                    user.vkLink = vkLink;
+                    user.telegramLink = telegramLink;
                     saveData();
-                    loadUserPosts();
-                    document.getElementById('post-text').value = '';
-                    document.getElementById('post-photo-upload').value = '';
-                }
-            });
-
-            document.getElementById('logout-link').addEventListener('click', () => {
-                localStorage.removeItem('user');
-                window.location.href = 'login.html';
-            });
-
-            async function loadUserPosts() {
-                const postsContainer = document.getElementById('user-posts');
-                postsContainer.innerHTML = '';
-                const userPosts = postsData.filter(post => post.userId === user.id);
-                if (userPosts.length === 0) {
-                    postsContainer.innerHTML = "<p>Нет постов.</p>";
-                    return;
+                    alert('Ссылки обновлены!');
                 }
 
-                userPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+                if (user) {
+                    document.getElementById('name').textContent = user.username;
+                    document.getElementById('avatar').src = user.avatarURL || 'default-avatar.svg';
+                    document.getElementById('profile-description').value = user.description || '';
+                    document.getElementById('description').textContent = user.description || 'Описание профиля';
+                    vkLinkInput.value = user.vkLink || '';
+                    telegramLinkInput.value = user.telegramLink || '';
+                    updateLinkDisplay(vkLinkInput, vkLinkDisplay);
+                    updateLinkDisplay(telegramLinkInput, telegramLinkDisplay);
+                }
 
-                let postRow = document.createElement('div');
-                postRow.classList.add('post-row');
-                let postCount = 0;
 
-                userPosts.forEach(post => {
-                    const postDiv = document.createElement('div');
-                    postDiv.classList.add('post');
-                    postDiv.innerHTML = `
+                document.getElementById('add-post').addEventListener('click', async () => {
+                    const fileInput = document.getElementById('post-photo-upload');
+                    const file = fileInput.files[0];
+                    const postText = document.getElementById('post-text').value;
+                    const userId = user.id;
+                    const currentDate = new Date().toISOString();
+
+                    if (postText.trim() === '') return;
+
+                    let photoURL = '';
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = async (e) => {
+                            photoURL = e.target.result;
+                            await sendPost(photoURL, postText, userId, currentDate);
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        await sendPost('', postText, userId, currentDate);
+                    }
+
+                    async function sendPost(photoURL, postText, userId, currentDate) {
+                        const newPost = {
+                            id: postsData.length > 0 ? Math.max(...postsData.map(post => post.id)) + 1 : 1,
+                            text: postText,
+                            userId: userId,
+                            photoURL: photoURL,
+                            date: currentDate
+                        };
+                        postsData.push(newPost);
+                        saveData();
+                        loadUserPosts();
+                        document.getElementById('post-text').value = '';
+                        document.getElementById('post-photo-upload').value = '';
+                    }
+                });
+
+                document.getElementById('logout-link').addEventListener('click', () => {
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                });
+
+                async function loadUserPosts() {
+                    const postsContainer = document.getElementById('user-posts');
+                    postsContainer.innerHTML = '';
+                    const userPosts = postsData.filter(post => post.userId === user.id);
+                    if (userPosts.length === 0) {
+                        postsContainer.innerHTML = "<p>Нет постов.</p>";
+                        return;
+                    }
+
+                    userPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                    let postRow = document.createElement('div');
+                    postRow.classList.add('post-row');
+                    let postCount = 0;
+
+                    userPosts.forEach(post => {
+                        const postDiv = document.createElement('div');
+                        postDiv.classList.add('post');
+                        postDiv.innerHTML = `
             ${post.photoURL ? `<img src="${post.photoURL}" alt="Фотография к посту">` : ''}
             <p>${post.text}</p>
             <p>Опубликовано: ${new Date(post.date).toLocaleDateString()}</p>
             <button class="delete-post" data-post-id="${post.id}">Удалить</button>
         `;
-                    postRow.appendChild(postDiv);
-                    postCount++;
+                        postRow.appendChild(postDiv);
+                        postCount++;
 
-                    if (postCount === 3) {
+                        if (postCount === 3) {
+                            postsContainer.appendChild(postRow);
+                            postRow = document.createElement('div');
+                            postRow.classList.add('post-row');
+                            postCount = 0;
+                        }
+                    });
+
+                    if (postCount > 0) {
                         postsContainer.appendChild(postRow);
-                        postRow = document.createElement('div');
-                        postRow.classList.add('post-row');
-                        postCount = 0;
+                    }
+                }
+                loadUserPosts();
+
+                document.getElementById('update-avatar').addEventListener('click', async () => {
+                    const fileInput = document.getElementById('avatar-upload');
+                    const file = fileInput.files[0];
+
+                    if (!file) {
+                        alert('Выберите файл для загрузки.');
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        const avatarURL = e.target.result;
+                        await updateAvatar(avatarURL);
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                async function updateAvatar(avatarURL) {
+                    const userIndex = usersData.findIndex(u => u.id === user.id);
+                    usersData[userIndex].avatarURL = avatarURL;
+                    user.avatarURL = avatarURL;
+                    saveData();
+                    document.getElementById('avatar').src = avatarURL;
+                    alert('Аватар обновлен!');
+                }
+
+                document.getElementById('update-description').addEventListener('click', async () => {
+                    const newDescription = document.getElementById('profile-description').value;
+                    await updateProfileDescription(newDescription);
+                });
+
+                async function updateProfileDescription(newDescription) {
+                    const userIndex = usersData.findIndex(u => u.id === user.id);
+                    usersData[userIndex].description = newDescription;
+                    user.description = newDescription;
+                    saveData();
+                    document.getElementById('description').textContent = newDescription;
+                    document.getElementById('profile-description').value = newDescription;
+                    alert('Описание обновлено!');
+                }
+
+                document.getElementById('user-posts').addEventListener('click', async (event) => {
+                    if (event.target.classList.contains('delete-post')) {
+                        const postId = event.target.dataset.postId;
+                        if (confirm(`Вы уверены, что хотите удалить пост?`)) {
+                            await deletePost(postId);
+                        }
                     }
                 });
 
-                if (postCount > 0) {
-                    postsContainer.appendChild(postRow);
+                async function deletePost(postId) {
+                    postsData = postsData.filter(post => post.id != postId);
+                    saveData();
+                    loadUserPosts();
+                    alert('Пост удалён!');
                 }
-            }
-            loadUserPosts();
-
-            document.getElementById('update-avatar').addEventListener('click', async () => {
-                const fileInput = document.getElementById('avatar-upload');
-                const file = fileInput.files[0];
-
-                if (!file) {
-                    alert('Выберите файл для загрузки.');
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    const avatarURL = e.target.result;
-                    await updateAvatar(avatarURL);
-                };
-                reader.readAsDataURL(file);
-            });
-
-            async function updateAvatar(avatarURL) {
-                const userIndex = usersData.findIndex(u => u.id === user.id);
-                usersData[userIndex].avatarURL = avatarURL;
-                user.avatarURL = avatarURL;
-                saveData();
-                document.getElementById('avatar').src = avatarURL;
-                alert('Аватар обновлен!');
-            }
-
-            document.getElementById('update-description').addEventListener('click', async () => {
-                const newDescription = document.getElementById('profile-description').value;
-                await updateProfileDescription(newDescription);
-            });
-
-            async function updateProfileDescription(newDescription) {
-                const userIndex = usersData.findIndex(u => u.id === user.id);
-                usersData[userIndex].description = newDescription;
-                user.description = newDescription;
-                saveData();
-                document.getElementById('description').textContent = newDescription;
-                document.getElementById('profile-description').value = newDescription;
-                alert('Описание обновлено!');
-            }
-
-            document.getElementById('user-posts').addEventListener('click', async (event) => {
-                if (event.target.classList.contains('delete-post')) {
-                    const postId = event.target.dataset.postId;
-                    if (confirm(`Вы уверены, что хотите удалить пост?`)) {
-                        await deletePost(postId);
-                    }
-                }
-            });
-
-            async function deletePost(postId) {
-                postsData = postsData.filter(post => post.id != postId);
-                saveData();
-                loadUserPosts();
-                alert('Пост удалён!');
             }
 
         </script>

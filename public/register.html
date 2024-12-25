@@ -15,6 +15,7 @@
             <button type="submit">Зарегистрироваться</button>
         </form>
         <p>Уже есть аккаунт? <a href="login.html">Войдите</a></p>
+        <button id="register-as-guest">Войти как наблюдатель</button>
         <script>
             document.getElementById('register-form').addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -32,6 +33,16 @@
                 localStorage.setItem('users', JSON.stringify(users));
                 alert('Регистрация успешна!');
                 window.location.href = 'login.html';
+            });
+            document.getElementById('register-as-guest').addEventListener('click', () => {
+                const guestUser = {
+                    id: 'guest',
+                    username: 'Guest',
+                    description: 'Наблюдатель',
+                    avatarURL: 'default-avatar.svg',
+                }
+                localStorage.setItem('user', JSON.stringify(guestUser));
+                window.location.href = 'profile.html';
             });
         </script>
     </div>
